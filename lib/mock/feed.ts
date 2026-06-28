@@ -1,0 +1,73 @@
+﻿import type { RunningFeedItem, RunningPost } from "@/types";
+
+export const runningFeed: RunningPost[] = [
+  {
+    id: 1,
+    author: "민준",
+    area: "서울 한강",
+    distance: "7.1km",
+    message: "퇴근 후 한강 7km 완주. 바람이 좋아서 페이스가 자연스럽게 올라갔어요.",
+    likes: 128,
+  },
+  {
+    id: 2,
+    author: "서연",
+    area: "부산 광안리",
+    distance: "5.0km",
+    message: "새벽 오션 러닝 성공. 다음 주에는 크루 정기런도 신청해보려고요.",
+    likes: 96,
+  },
+  {
+    id: 3,
+    author: "도윤",
+    area: "대구 신천",
+    distance: "12.4km",
+    message: "하프 준비 첫 장거리. 보급 포인트 정보가 정말 도움이 됐습니다.",
+    likes: 154,
+  },
+];
+
+export const runningFeedItems: RunningFeedItem[] = [
+  {
+    id: 1,
+    author: "민준",
+    area: "서울 한강",
+    avatarLabel: "민",
+    distance: "7.1km",
+    duration: "39분 12초",
+    pace: "5분31초",
+    message: "퇴근 후 한강 7km 완주. 바람이 좋아서 페이스가 자연스럽게 올라갔어요.",
+    likes: 128,
+    comments: 18,
+    uploadedAt: "12분 전",
+    gradient: "from-run-lime/24 via-white/[0.035] to-transparent",
+  },
+  {
+    id: 2,
+    author: "서연",
+    area: "부산 광안리",
+    avatarLabel: "서",
+    distance: "5.0km",
+    duration: "31분 44초",
+    pace: "6분21초",
+    message: "새벽 오션 러닝 성공. 다음 주에는 크루 정기런도 신청해보려고요.",
+    likes: 96,
+    comments: 11,
+    uploadedAt: "38분 전",
+    gradient: "from-sky-400/24 via-white/[0.035] to-transparent",
+  },
+  {
+    id: 3,
+    author: "도윤",
+    area: "대구 신천",
+    avatarLabel: "도",
+    distance: "12.4km",
+    duration: "1시간 08분",
+    pace: "5분29초",
+    message: "하프 준비 첫 장거리. 보급 포인트 정보가 정말 도움이 됐습니다.",
+    likes: 154,
+    comments: 24,
+    uploadedAt: "1시간 전",
+    gradient: "from-emerald-300/20 via-white/[0.035] to-transparent",
+  },
+];

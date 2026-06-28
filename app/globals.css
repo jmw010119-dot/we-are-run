@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --run-lime: #b7ff2a;
+  --run-bg: #070b0e;
+  --run-card: #10161b;
+  --run-card-hover: #151c22;
+  --run-border: #26313a;
+  --run-text: #f5f7f8;
+  --run-muted: #9aa5ad;
+}
+
+@theme {
+  --color-run-lime: #b7ff2a;
+  --color-run-bg: #070b0e;
+  --color-run-card: #10161b;
+  --color-run-card-hover: #151c22;
+  --color-run-border: #26313a;
+  --color-run-text: #f5f7f8;
+  --color-run-muted: #9aa5ad;
+  --font-sans: Pretendard, "Noto Sans KR", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--run-bg);
+  color: var(--run-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 78% 8%, rgba(183, 255, 42, 0.12), transparent 26rem),
+    linear-gradient(180deg, #070b0e 0%, #091015 50%, #070b0e 100%);
+  color: var(--run-text);
+  font-family: Pretendard, "Noto Sans KR", system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.run-container {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.section-heading p {
+  margin: 8px 0 0;
+  color: var(--run-muted);
+}
