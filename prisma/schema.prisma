@@ -1,0 +1,459 @@
+// WE ARE RUN database draft schema.
+// This is a design draft only. Do not run migrate until the database strategy is finalized.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum UserLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ANYONE
+}
+
+enum CourseDifficulty {
+  EASY
+  NORMAL
+  HARD
+}
+
+enum FacilityType {
+  TRACK
+  PARK
+  INDOOR
+  STADIUM
+  WALKWAY
+}
+
+enum FacilityStatus {
+  OPEN
+  CLOSED
+  ALWAYS_OPEN
+}
+
+enum CrewLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ANYONE
+}
+
+enum CrewRunType {
+  REGULAR
+  FLASH
+  LONG
+  BEGINNER
+}
+
+enum EquipmentCategory {
+  SHOES
+  APPAREL
+  GPS_WATCH
+  ACCESSORY
+}
+
+enum PostCategory {
+  RUN_CERTIFICATION
+  FREE_BOARD
+  QUESTION
+  INFORMATION
+  REVIEW
+  CREW_RECRUITING
+}
+
+enum BookmarkTargetType {
+  COURSE
+  FACILITY
+  CREW
+  EQUIPMENT
+  POST
+}
+
+enum LikeTargetType {
+  POST
+  COMMENT
+  RUNNING_RECORD
+}
+
+enum ReviewTargetType {
+  COURSE
+  FACILITY
+  EQUIPMENT
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+  CREW
+  USER
+  REVIEW
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  REJECTED
+}
+
+enum ApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CrewMemberRole {
+  OWNER
+  LEADER
+  MEMBER
+}
+
+enum CrewMemberStatus {
+  PENDING
+  ACTIVE
+  LEFT
+  BANNED
+}
+
+enum AdminLogAction {
+  CREATE
+  UPDATE
+  APPROVE
+  REJECT
+  DELETE
+  REPORT_RESOLVE
+  LOGIN
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  nickname  String    @unique
+  region    String?
+  city      String?
+  bio       String?
+  avatarUrl String?
+  role      UserRole  @default(USER)
+  level     UserLevel @default(BEGINNER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  courses        RunningCourse[]   @relation("CourseAuthor")
+  facilities     RunningFacility[] @relation("FacilityAuthor")
+  crewsOwned     RunningCrew[]     @relation("CrewOwner")
+  equipmentItems EquipmentItem[]   @relation("EquipmentAuthor")
+  posts          CommunityPost[]
+  comments       Comment[]
+  bookmarks      Bookmark[]
+  likes          Like[]
+  reviews        Review[]
+  crewMembers    CrewMember[]
+  runningRecords RunningRecord[]
+  reportsMade    Report[]          @relation("ReportReporter")
+  reportsTarget  Report[]          @relation("ReportTargetUser")
+  adminLogs      AdminLog[]
+}
+
+model RunningCourse {
+  id             String           @id @default(cuid())
+  name           String
+  slug           String           @unique
+  region         String
+  city           String
+  distanceKm     Decimal          @db.Decimal(6, 2)
+  difficulty     CourseDifficulty
+  type           String
+  estimatedTime  String
+  description    String
+  tags           String[]
+  startPoint     String?
+  endPoint       String?
+  latitude       Decimal?         @db.Decimal(10, 7)
+  longitude      Decimal?         @db.Decimal(10, 7)
+  approvalStatus ApprovalStatus   @default(PENDING)
+  authorId       String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  author         User?           @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  reviews        Review[]
+  bookmarks      Bookmark[]
+  runningRecords RunningRecord[]
+}
+
+model RunningFacility {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  region         String
+  city           String
+  type           FacilityType
+  status         FacilityStatus @default(OPEN)
+  address        String
+  hours          String
+  description    String
+  amenities      String[]
+  latitude       Decimal?       @db.Decimal(10, 7)
+  longitude      Decimal?       @db.Decimal(10, 7)
+  approvalStatus ApprovalStatus @default(PENDING)
+  authorId       String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  author    User?      @relation("FacilityAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  reviews   Review[]
+  bookmarks Bookmark[]
+}
+
+model RunningCrew {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  region         String
+  city           String
+  description    String
+  level          CrewLevel      @default(ANYONE)
+  runTypes       CrewRunType[]
+  regularRunDay  String?
+  regularRunTime String?
+  hasFlashRun    Boolean        @default(false)
+  isRecruiting   Boolean        @default(true)
+  tags           String[]
+  ownerId        String?
+  approvalStatus ApprovalStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  owner     User?          @relation("CrewOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  bookmarks Bookmark[]
+  members   CrewMember[]
+  schedules CrewSchedule[]
+  reports   Report[]       @relation("ReportTargetCrew")
+}
+
+model EquipmentItem {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  brand           String
+  category        EquipmentCategory
+  level           UserLevel
+  purposes        String[]
+  price           Int
+  description     String
+  recommendReason String
+  authorId        String?
+  approvalStatus  ApprovalStatus    @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  author    User?      @relation("EquipmentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  bookmarks Bookmark[]
+  reviews   Review[]
+}
+
+model CommunityPost {
+  id              String       @id @default(cuid())
+  title           String
+  content         String
+  category        PostCategory
+  tags            String[]
+  imageUrl        String?
+  authorId        String
+  runningRecordId String?      @unique
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  runningRecord RunningRecord? @relation(fields: [runningRecordId], references: [id], onDelete: SetNull)
+  bookmarks     Bookmark[]
+  likes         Like[]
+  comments      Comment[]
+  reports       Report[]       @relation("ReportTargetPost")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  postId    String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]     @relation("CommentReplies")
+  likes   Like[]
+  reports Report[]      @relation("ReportTargetComment")
+}
+
+model Bookmark {
+  id          String             @id @default(cuid())
+  userId      String
+  targetType  BookmarkTargetType
+  targetId    String
+  courseId    String?
+  facilityId  String?
+  crewId      String?
+  equipmentId String?
+  postId      String?
+  createdAt   DateTime           @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    RunningCourse?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  facility  RunningFacility? @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  crew      RunningCrew?     @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  equipment EquipmentItem?   @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  post      CommunityPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([courseId])
+  @@index([facilityId])
+  @@index([crewId])
+  @@index([equipmentId])
+  @@index([postId])
+}
+
+model Like {
+  id              String         @id @default(cuid())
+  userId          String
+  targetType      LikeTargetType
+  targetId        String
+  postId          String?
+  commentId       String?
+  runningRecordId String?
+  createdAt       DateTime       @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post          CommunityPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment       Comment?       @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  runningRecord RunningRecord? @relation(fields: [runningRecordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([postId])
+  @@index([commentId])
+  @@index([runningRecordId])
+}
+
+model Review {
+  id         String           @id @default(cuid())
+  userId     String
+  targetType ReviewTargetType
+  targetId   String
+  rating     Int
+  content    String
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      RunningCourse?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String?
+  facility    RunningFacility? @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  facilityId  String?
+  equipment   EquipmentItem?   @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  equipmentId String?
+  reports     Report[]         @relation("ReportTargetReview")
+
+  @@index([targetType, targetId])
+}
+
+model CrewSchedule {
+  id         String      @id @default(cuid())
+  crewId     String
+  title      String
+  runType    CrewRunType
+  date       DateTime
+  place      String
+  distanceKm Decimal?    @db.Decimal(6, 2)
+  pace       String?
+  capacity   Int?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  crew RunningCrew @relation(fields: [crewId], references: [id], onDelete: Cascade)
+}
+
+model CrewMember {
+  id       String           @id @default(cuid())
+  crewId   String
+  userId   String
+  role     CrewMemberRole   @default(MEMBER)
+  status   CrewMemberStatus @default(ACTIVE)
+  joinedAt DateTime         @default(now())
+
+  crew RunningCrew @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([crewId, userId])
+}
+
+model RunningRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String?
+  distanceKm  Decimal  @db.Decimal(6, 2)
+  durationSec Int
+  pace        String
+  memo        String?
+  imageUrl    String?
+  recordedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course RunningCourse? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  likes  Like[]
+  post   CommunityPost?
+}
+
+model Report {
+  id         String           @id @default(cuid())
+  reporterId String
+  targetType ReportTargetType
+  targetId   String
+  reason     String
+  status     ReportStatus     @default(PENDING)
+  createdAt  DateTime         @default(now())
+  resolvedAt DateTime?
+
+  reporter        User           @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUser      User?          @relation("ReportTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+  targetUserId    String?
+  targetPost      CommunityPost? @relation("ReportTargetPost", fields: [targetPostId], references: [id], onDelete: Cascade)
+  targetPostId    String?
+  targetComment   Comment?       @relation("ReportTargetComment", fields: [targetCommentId], references: [id], onDelete: Cascade)
+  targetCommentId String?
+  targetCrew      RunningCrew?   @relation("ReportTargetCrew", fields: [targetCrewId], references: [id], onDelete: Cascade)
+  targetCrewId    String?
+  targetReview    Review?        @relation("ReportTargetReview", fields: [targetReviewId], references: [id], onDelete: Cascade)
+  targetReviewId  String?
+
+  @@index([targetType, targetId])
+}
+
+model AdminLog {
+  id         String         @id @default(cuid())
+  adminId    String?
+  action     AdminLogAction
+  targetType String
+  targetId   String?
+  message    String
+  createdAt  DateTime       @default(now())
+
+  admin User? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+}
