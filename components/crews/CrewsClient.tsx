@@ -6,7 +6,6 @@ import { CrewList } from "@/components/crews/CrewList";
 import { CrewSummary } from "@/components/crews/CrewSummary";
 import { CrewsPageHero } from "@/components/crews/CrewsPageHero";
 import { Section } from "@/components/common/ui/Section";
-import { runningCrews } from "@/lib/mock";
 import type { RunningCrew } from "@/types";
 
 const initialFilters: CrewFilters = {
@@ -31,14 +30,18 @@ function sortCrews(crews: RunningCrew[], sort: string) {
   return sorted;
 }
 
-export function CrewsClient() {
+type CrewsClientProps = {
+  crews: RunningCrew[];
+};
+
+export function CrewsClient({ crews }: CrewsClientProps) {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<CrewFilters>(initialFilters);
 
   const filteredCrews = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextCrews = runningCrews.filter((crew) => {
+    const nextCrews = crews.filter((crew) => {
       const searchableText = [
         crew.name,
         crew.region,
@@ -62,7 +65,7 @@ export function CrewsClient() {
     });
 
     return sortCrews(nextCrews, filters.sort);
-  }, [filters, query]);
+  }, [crews, filters, query]);
 
   const handleFilterChange = (key: keyof CrewFilters, value: string) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -78,15 +81,15 @@ export function CrewsClient() {
       <CrewsPageHero query={query} onQueryChange={setQuery} />
       <Section spacing="lg" className="border-b-0 pt-8 md:pt-10">
         <div className="grid gap-5">
-          <CrewSummary crews={runningCrews} />
+          <CrewSummary crews={crews} />
           <CrewFilterBar
             filters={filters}
             resultCount={filteredCrews.length}
-            totalCount={runningCrews.length}
+            totalCount={crews.length}
             onFilterChange={handleFilterChange}
             onReset={handleReset}
           />
-          <CrewList crews={filteredCrews} totalCount={runningCrews.length} onReset={handleReset} />
+          <CrewList crews={filteredCrews} totalCount={crews.length} onReset={handleReset} />
         </div>
       </Section>
     </>

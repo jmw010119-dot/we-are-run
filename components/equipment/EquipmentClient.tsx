@@ -7,7 +7,6 @@ import { EquipmentPageHero } from "@/components/equipment/EquipmentPageHero";
 import { EquipmentSummary } from "@/components/equipment/EquipmentSummary";
 import { FeaturedEquipment } from "@/components/equipment/FeaturedEquipment";
 import { Section } from "@/components/common/ui/Section";
-import { equipmentRecommendations } from "@/lib/mock";
 import type { EquipmentItem } from "@/types";
 
 const initialFilters: EquipmentFilters = {
@@ -56,14 +55,18 @@ function sortEquipment(items: EquipmentItem[], sort: string) {
   return sorted;
 }
 
-export function EquipmentClient() {
+type EquipmentClientProps = {
+  equipment: EquipmentItem[];
+};
+
+export function EquipmentClient({ equipment }: EquipmentClientProps) {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<EquipmentFilters>(initialFilters);
 
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextItems = equipmentRecommendations.filter((item) => {
+    const nextItems = equipment.filter((item) => {
       const searchableText = [
         item.name,
         item.brand,
@@ -85,7 +88,7 @@ export function EquipmentClient() {
     });
 
     return sortEquipment(nextItems, filters.sort);
-  }, [filters, query]);
+  }, [equipment, filters, query]);
 
   const handleFilterChange = (key: keyof EquipmentFilters, value: string) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -101,16 +104,16 @@ export function EquipmentClient() {
       <EquipmentPageHero query={query} onQueryChange={setQuery} />
       <Section spacing="lg" className="border-b-0 pt-8 md:pt-10">
         <div className="grid gap-5">
-          <EquipmentSummary items={equipmentRecommendations} />
+          <EquipmentSummary items={equipment} />
           <EquipmentFilterBar
             filters={filters}
             resultCount={filteredItems.length}
-            totalCount={equipmentRecommendations.length}
+            totalCount={equipment.length}
             onFilterChange={handleFilterChange}
             onReset={handleReset}
           />
           {filteredItems[0] ? <FeaturedEquipment item={filteredItems[0]} /> : null}
-          <EquipmentGrid items={filteredItems} totalCount={equipmentRecommendations.length} onReset={handleReset} />
+          <EquipmentGrid items={filteredItems} totalCount={equipment.length} onReset={handleReset} />
         </div>
       </Section>
     </>

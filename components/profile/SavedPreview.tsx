@@ -4,12 +4,23 @@ import { Badge } from "@/components/common/ui/Badge";
 import { Button } from "@/components/common/ui/Button";
 import { Card } from "@/components/common/ui/Card";
 import { profileJoinedCrews, profileSavedCourses, profileSavedEquipment } from "@/lib/mock";
+import type { EquipmentItem, RunningCourse, RunningCrew } from "@/types";
 
 function formatPrice(price: number) {
   return `${price.toLocaleString("ko-KR")}원`;
 }
 
-export function SavedPreview() {
+type SavedPreviewProps = {
+  courses?: Pick<RunningCourse, "id" | "name" | "region" | "city" | "distance" | "difficulty" | "rating" | "gradient">[];
+  crews?: Pick<RunningCrew, "id" | "name" | "region" | "city" | "memberCount" | "level" | "nextSchedule" | "gradient">[];
+  equipment?: Pick<EquipmentItem, "id" | "name" | "brand" | "category" | "level" | "price" | "rating" | "gradient">[];
+};
+
+export function SavedPreview({
+  courses = profileSavedCourses,
+  crews = profileJoinedCrews,
+  equipment = profileSavedEquipment,
+}: SavedPreviewProps) {
   return (
     <div>
       <SectionHeader
@@ -29,7 +40,7 @@ export function SavedPreview() {
             <Button href="/courses" variant="ghost" size="sm" rightIcon={<ArrowUpRight size={15} />}>전체보기</Button>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
-            {profileSavedCourses.map((course) => (
+            {courses.map((course) => (
               <div key={course.id} className="rounded-[20px] border border-run-border bg-run-bg/70 p-4">
                 <div className={["mb-4 h-20 rounded-[16px] border border-white/[0.08] bg-gradient-to-br", course.gradient].join(" ")} />
                 <h4 className="break-keep text-base font-black text-run-text">{course.name}</h4>
@@ -45,7 +56,7 @@ export function SavedPreview() {
             <p className="text-xs font-black tracking-[0.18em] text-run-lime">CREWS</p>
             <h3 className="mt-2 text-xl font-black text-run-text">가입한 크루</h3>
             <div className="mt-5 grid gap-3">
-              {profileJoinedCrews.map((crew) => (
+              {crews.map((crew) => (
                 <div key={crew.id} className="flex items-center gap-3 rounded-[18px] border border-run-border bg-run-bg/70 p-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-run-lime/25 bg-run-lime/10 text-run-lime"><Users size={16} /></span>
                   <div className="min-w-0 flex-1">
@@ -62,7 +73,7 @@ export function SavedPreview() {
             <p className="text-xs font-black tracking-[0.18em] text-run-lime">EQUIPMENT</p>
             <h3 className="mt-2 text-xl font-black text-run-text">관심 장비</h3>
             <div className="mt-5 grid gap-3">
-              {profileSavedEquipment.map((item) => (
+              {equipment.map((item) => (
                 <div key={item.id} className="rounded-[18px] border border-run-border bg-run-bg/70 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">

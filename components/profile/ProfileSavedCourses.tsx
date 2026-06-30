@@ -5,9 +5,14 @@ import { Button } from "@/components/common/ui/Button";
 import { Card } from "@/components/common/ui/Card";
 import { EmptyState } from "@/components/common/ui/EmptyState";
 import { profileSavedCourses } from "@/lib/mock";
+import type { RunningCourse } from "@/types";
 
-export function ProfileSavedCourses() {
-  if (profileSavedCourses.length === 0) {
+type ProfileSavedCoursesProps = {
+  courses?: Pick<RunningCourse, "id" | "name" | "region" | "city" | "distance" | "difficulty" | "rating" | "gradient">[];
+};
+
+export function ProfileSavedCourses({ courses = profileSavedCourses }: ProfileSavedCoursesProps) {
+  if (courses.length === 0) {
     return <EmptyState title="저장한 코스가 없습니다" description="마음에 드는 러닝 코스를 저장하면 이곳에서 볼 수 있습니다." />;
   }
 
@@ -15,7 +20,7 @@ export function ProfileSavedCourses() {
     <div className="min-w-0">
       <SectionHeader label="SAVED COURSES" title="저장한 코스" description="다시 달리고 싶은 러닝 루트를 모아두었습니다." compact className="mb-5" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {profileSavedCourses.map((course) => (
+        {courses.map((course) => (
           <Card key={course.id} variant="hover" padding="lg" radius="xl" className="flex min-h-[360px] min-w-0 flex-col overflow-hidden">
             <div className={["mb-5 h-28 shrink-0 rounded-[18px] border border-white/[0.08] bg-gradient-to-br", course.gradient].join(" ")} />
             <Badge variant="green" className="w-fit">{course.difficulty}</Badge>

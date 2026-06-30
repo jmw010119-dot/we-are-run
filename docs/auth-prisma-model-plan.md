@@ -1,58 +1,62 @@
 # Auth Prisma Model Plan
 
-Auth.js Prisma Adapter를 WE ARE RUN의 기존 `User` 모델과 연결하기 위한 DB 모델 설계 문서입니다.
-
-현재 단계에서는 `schema.prisma`를 수정하지 않습니다. 이 문서는 실제 Prisma schema 변경 전에 모델 구조와 관계를 먼저 확정하기 위한 설계안입니다.
+Auth.js Prisma Adapter를 WE ARE RUN의 기존 `User` 모델과 연결하기 위한 DB 모델 설계 및 반영 상태입니다.
 
 ## 목적
 
-- Auth.js Prisma Adapter가 요구하는 모델을 WE ARE RUN 도메인과 자연스럽게 연결합니다.
-- 기존 `User` 모델을 유지하면서 OAuth, Database Session, Email Login 확장 가능성을 확보합니다.
-- Google, Kakao, Naver OAuth 계정을 하나의 User에 연결할 수 있게 설계합니다.
-- Admin 권한과 기존 `UserRole` enum을 계속 활용합니다.
+- Google, Kakao, Naver OAuth 계정을 하나의 `User`와 연결할 수 있게 준비합니다.
+- Auth.js Prisma Adapter가 요구하는 `Account`, `Session`, `VerificationToken` 모델을 제공합니다.
+- 기존 서비스 도메인 관계를 유지하면서 Auth.js 호환 필드를 `User`에 추가합니다.
+- 이번 단계에서는 DB 모델과 migration만 반영하고, `auth.ts`에 Prisma Adapter는 아직 연결하지 않습니다.
 
-## 필요한 모델
+## 현재 반영 상태
 
-Auth.js Prisma Adapter 도입 시 필요한 기본 모델은 아래와 같습니다.
+완료:
 
-- `User`
-- `Account`
-- `Session`
-- `VerificationToken`
+- `@auth/prisma-adapter` 설치
+- `User` 모델 Auth.js 호환 필드 추가
+- `Account` 모델 추가
+- `Session` 모델 추가
+- `VerificationToken` 모델 추가
+- migration `add_auth_models` 적용
+- Prisma Client generate 완료
 
-WE ARE RUN의 서비스 도메인 모델은 기존처럼 `User`와 연결됩니다.
+아직 미연결:
 
-## User 모델 확장 계획
+- `auth.ts`의 Prisma Adapter 연결
+- Database Session 전략 전환
+- 보호 라우트 적용
+- middleware 적용
+- Kakao/Naver Provider 연결
 
-현재 `User` 모델에 Auth.js Adapter 호환을 위해 검토할 필드입니다.
+## User 모델
 
-| 필드 | 목적 | 비고 |
-| --- | --- | --- |
-| `id` | 사용자 고유 ID | 기존 유지 |
-| `name` | OAuth provider에서 받은 이름 | Auth.js 호환 필드 |
-| `email` | 로그인 이메일 | unique 필요 |
-| `emailVerified` | 이메일 인증 시각 | Email Login 대비 |
-| `image` | OAuth profile image | 기존 `avatarUrl`과 역할 조정 필요 |
-| `role` | 권한 | 기존 `UserRole` enum 연결 |
-| `level` | 러닝 레벨 | 기존 `UserLevel` enum 연결 |
-| `region` | 지역 | 기존 유지 |
-| `bio` | 한 줄 소개 | 기존 유지 |
-| `createdAt` | 생성 시각 | 기존 유지 |
-| `updatedAt` | 수정 시각 | 기존 유지 |
+Auth.js 호환을 위해 `User`에 아래 필드를 반영했습니다.
 
-추후 결정할 내용:
+| 필드 | 목적 |
+| --- | --- |
+| `id` | 사용자 고유 ID |
+| `name` | OAuth Provider에서 받은 이름 |
+| `email` | 로그인 이메일, unique |
+| `emailVerified` | 이메일 인증 시각 |
+| `image` | OAuth Provider 프로필 이미지 |
+| `nickname` | WE ARE RUN 서비스 표시 이름 |
+| `region` | 활동 지역 |
+| `city` | 활동 도시 |
+| `bio` | 소개 문구 |
+| `avatarUrl` | 서비스 내부 아바타 확장용 |
+| `role` | `UserRole` 기반 권한 |
+| `level` | 러닝 레벨 |
+| `createdAt` | 생성 시각 |
+| `updatedAt` | 수정 시각 |
 
-- `nickname`과 `name`을 둘 다 유지할지 결정
-- `avatarUrl`과 `image`를 둘 다 유지할지 결정
-- OAuth 최초 로그인 시 `nickname` 기본값 생성 규칙 결정
+`email`, `nickname`은 OAuth 신규 사용자 생성 흐름을 고려해 nullable로 정리했습니다. 기존 seed 데이터는 두 값을 계속 제공합니다.
 
 ## Account 모델
 
-`Account` 모델은 OAuth 계정 연결용입니다.
+OAuth 계정 연결용 모델입니다.
 
-Google, Kakao, Naver 로그인은 모두 `Account` 모델을 통해 하나의 `User`와 연결됩니다.
-
-필요 필드:
+주요 필드:
 
 - `userId`
 - `type`
@@ -66,25 +70,23 @@ Google, Kakao, Naver 로그인은 모두 `Account` 모델을 통해 하나의 `U
 - `id_token`
 - `session_state`
 
-핵심 제약:
-
-- `provider` + `providerAccountId` 조합은 unique여야 합니다.
-- 한 명의 User는 여러 Account를 가질 수 있습니다.
-
-예:
+관계:
 
 ```text
-User 1
-├─ Google Account
-├─ Kakao Account
-└─ Naver Account
+User 1:N Account
+```
+
+제약:
+
+```text
+@@id([provider, providerAccountId])
 ```
 
 ## Session 모델
 
-`Session` 모델은 Database Session 관리를 위한 모델입니다.
+Database Session 전환을 위한 모델입니다.
 
-필요 필드:
+주요 필드:
 
 - `sessionToken`
 - `userId`
@@ -92,32 +94,31 @@ User 1
 
 관계:
 
-- User 1:N Session
+```text
+User 1:N Session
+```
 
-Database Session을 사용하면 서버에서 세션을 삭제하거나 관리하기 쉽습니다. WE ARE RUN은 Admin 권한, 계정 제재, 운영 관리 가능성을 고려해 Database Session을 우선 선택합니다.
+현재 `auth.ts`는 아직 임시 `jwt` session strategy를 사용합니다. 다음 Sprint에서 Prisma Adapter 연결과 함께 Database Session 전환 여부를 결정합니다.
 
 ## VerificationToken 모델
 
-`VerificationToken`은 Email Login 또는 이메일 인증을 위한 모델입니다.
+Email Login 또는 이메일 인증 도입을 위한 모델입니다.
 
-필요 필드:
+주요 필드:
 
 - `identifier`
 - `token`
 - `expires`
 
-초기 OAuth 구현에서는 바로 사용하지 않을 수 있습니다. 다만 Email Login을 나중에 도입할 수 있으므로 모델 계획에는 포함합니다.
-
-## 관계
-
-Auth 관련 관계:
+제약:
 
 ```text
-User 1:N Account
-User 1:N Session
+@@id([identifier, token])
 ```
 
-WE ARE RUN 서비스 관계:
+## 기존 서비스 관계 유지
+
+`User`는 기존 WE ARE RUN 도메인 관계를 그대로 유지합니다.
 
 ```text
 User 1:N CommunityPost
@@ -127,82 +128,27 @@ User 1:N Like
 User 1:N Review
 User 1:N RunningRecord
 User 1:N CrewMember
-```
-
-Admin 관련 관계:
-
-```text
 User 1:N AdminLog
-User 1:N Report as reporter
 ```
 
-## UserRole 연결
+## Seed 영향
 
-WE ARE RUN의 권한은 기존 `UserRole` enum을 유지합니다.
+기존 `prisma/seed.ts`는 `email`, `nickname`, `role`, `level`을 이미 제공하고 있습니다.
 
-예상 값:
+이번 schema 변경에서 추가된 `name`, `emailVerified`, `image`는 optional 필드이므로 seed 재실행 없이도 TypeScript와 build가 통과합니다.
 
-- `USER`
-- `ADMIN`
-- `MODERATOR`
+이번 Sprint에서는 seed를 재실행하지 않았습니다.
 
-권한 매핑:
+## 다음 구현 순서
 
-| 서비스 권한 | UserRole |
-| --- | --- |
-| Guest | DB User 없음 |
-| Member | `USER` |
-| Admin | `ADMIN` |
-| Moderator | `MODERATOR` |
+1. `auth.ts`에 Prisma Adapter 연결
+2. Prisma Client singleton과 Auth Adapter 연결 방식 확정
+3. session strategy를 `database`로 전환할지 결정
+4. Google OAuth 실제 로그인 후 `User`, `Account`, `Session` 생성 확인
+5. `/profile`에서 실제 session user id 기반 데이터 확인
+6. `/admin` 보호 라우트와 권한 체크 설계
 
-## OAuth Provider 연결 계획
-
-초기 구현 순서:
-
-1. Google
-2. Kakao
-3. Naver
-
-모든 OAuth provider는 `Account` 모델에 저장합니다.
-
-Provider별 예상 값:
-
-- Google: `google`
-- Kakao: `kakao`
-- Naver: `naver`
-
-실제 provider id는 Auth.js provider 설정 시 최종 확인합니다.
-
-## Email Login 계획
-
-Email Login은 초기 구현 범위에서 제외합니다.
-
-나중에 도입할 때 필요한 것:
-
-- `VerificationToken` 모델 사용
-- 메일 발송 서비스
-- 로그인 링크 만료 정책
-- 이메일 인증 UX
-
-## 주의사항
-
-- Auth.js Adapter 모델명과 필드명은 공식 권장 구조를 최대한 유지합니다.
-- 기존 `UserRole` enum과 연결합니다.
-- `email`은 unique가 필요합니다.
-- Google, Kakao, Naver OAuth는 모두 `Account` 모델로 연결합니다.
-- Email Login은 나중에 `VerificationToken`을 사용합니다.
-- 이번 Sprint에서는 `schema.prisma`를 수정하지 않습니다.
-- 실제 migration은 DB 연결과 Auth.js 설치 이후 별도 Sprint에서 진행합니다.
-
-## 다음 단계에서 할 일
-
-- `schema.prisma`에 `Account`, `Session`, `VerificationToken` 모델 추가
-- 기존 `User` 모델에 Auth.js 필드 추가
-- Auth.js Prisma Adapter 설치
-- Google OAuth부터 실제 연결
-- `/profile`, `/admin` 보호 정책 적용
-
-## 참고 공식 문서
+## 참고
 
 - Auth.js Prisma Adapter: https://authjs.dev/getting-started/adapters/prisma
 - Auth.js Database Models: https://authjs.dev/concepts/database-models

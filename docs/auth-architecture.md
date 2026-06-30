@@ -2,7 +2,7 @@
 
 WE ARE RUN의 인증 구조 설계 문서입니다.
 
-현재 프로젝트에는 Auth.js v5 기본 구조와 Google Provider 조건부 설정이 준비되어 있습니다. Prisma Adapter, DB Session, middleware, 보호 라우트는 아직 연결하지 않았습니다.
+현재 프로젝트에는 Auth.js v5 기본 구조, Google Provider 조건부 설정, Prisma Adapter, Database Session 연결이 준비되어 있습니다. middleware와 보호 라우트는 아직 적용하지 않았습니다.
 
 관련 세부 문서:
 
@@ -24,16 +24,15 @@ WE ARE RUN의 인증 구조 설계 문서입니다.
 - `/login` Google 버튼에서 `signIn("google")` 호출
 - Google Provider 비활성 상태 안내 표시
 - Auth Error 페이지에서 주요 오류 코드별 안내 표시
-- 임시 session strategy를 `jwt`로 설정
+- Prisma Adapter 연결
+- Database Session strategy 적용
+- session callback에서 `session.user.id`, `session.user.role` 제공
 
 아직 미연결:
 
 - 실제 Google OAuth 앱
 - Kakao Provider
 - Naver Provider
-- Prisma Adapter
-- Database Session
-- DB 연결
 - middleware
 - 보호 라우트
 
@@ -42,11 +41,12 @@ WE ARE RUN의 인증 구조 설계 문서입니다.
 WE ARE RUN의 최종 인증 기술은 아래 조합을 목표로 합니다.
 
 - Auth.js v5
+- Google Provider
 - Prisma Adapter
 - Database Session
 - PostgreSQL, Prisma 기반 User 모델
 
-현재는 DB 연결 전 단계이므로 임시로 JWT session strategy를 사용합니다. Prisma Adapter와 DB가 준비되면 Database Session으로 전환합니다.
+현재 `auth.ts`는 Prisma Adapter와 Database Session을 사용합니다. 로그인 성공 시 Auth.js가 `User`, `Account`, `Session` 데이터를 Prisma를 통해 저장/관리할 수 있습니다.
 
 ## Google Provider 조건부 전략
 
@@ -76,7 +76,7 @@ Auth.js Prisma Adapter를 사용할 때 필요한 모델:
 - `Session`
 - `VerificationToken`
 
-현재 `schema.prisma`는 아직 수정하지 않았습니다. 실제 Adapter 연결 전 [Auth Prisma Model Plan](auth-prisma-model-plan.md)을 기준으로 User 모델과 Auth 모델을 확장합니다.
+현재 `schema.prisma`에는 `Account`, `Session`, `VerificationToken` 모델이 반영되어 있습니다. 자세한 내용은 [Auth Prisma Model Plan](auth-prisma-model-plan.md)을 기준으로 관리합니다.
 
 ## 라우트 보호 구조
 
@@ -111,7 +111,7 @@ Admin 권한은 추후 `UserRole.ADMIN`과 연결합니다.
 ## 구현 시 주의사항
 
 - OAuth Client ID/Secret은 GitHub에 올리지 않습니다.
-- Prisma Adapter 연결 전에는 DB Session으로 전환하지 않습니다.
+- Prisma Adapter와 Database Session을 사용하지만, middleware 기반 보호 라우트는 아직 적용하지 않습니다.
 - middleware에서는 과도한 DB 호출을 피합니다.
 - 실제 데이터 변경 API에서도 서버 권한 검증을 다시 수행해야 합니다.
 

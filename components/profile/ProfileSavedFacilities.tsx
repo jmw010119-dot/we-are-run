@@ -5,9 +5,14 @@ import { Button } from "@/components/common/ui/Button";
 import { Card } from "@/components/common/ui/Card";
 import { EmptyState } from "@/components/common/ui/EmptyState";
 import { profileSavedFacilities } from "@/lib/mock";
+import type { ProfileSavedFacility } from "@/types";
 
-export function ProfileSavedFacilities() {
-  if (profileSavedFacilities.length === 0) {
+type ProfileSavedFacilitiesProps = {
+  facilities?: ProfileSavedFacility[];
+};
+
+export function ProfileSavedFacilities({ facilities = profileSavedFacilities }: ProfileSavedFacilitiesProps) {
+  if (facilities.length === 0) {
     return <EmptyState title="저장한 시설이 없습니다" description="러닝 시설을 저장하면 편의시설 정보와 함께 이곳에 표시됩니다." />;
   }
 
@@ -15,7 +20,7 @@ export function ProfileSavedFacilities() {
     <div className="min-w-0">
       <SectionHeader label="SAVED FACILITIES" title="저장한 시설" description="자주 찾는 트랙, 공원, 경기장 정보를 모아두었습니다." compact className="mb-5" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {profileSavedFacilities.map((facility) => (
+        {facilities.map((facility) => (
           <Card key={facility.id} variant="hover" padding="lg" radius="xl" className="flex min-h-[382px] min-w-0 flex-col overflow-hidden">
             <div className={["mb-5 h-28 shrink-0 rounded-[18px] border border-white/[0.08] bg-gradient-to-br", facility.gradient].join(" ")} />
             <Badge variant="info" className="w-fit">{facility.type}</Badge>

@@ -2,6 +2,7 @@
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { Card } from "@/components/common/ui/Card";
 import { profileActivities } from "@/lib/mock";
+import type { ProfileActivity } from "@/types";
 
 const typeIcon = {
   running: <Footprints size={16} />,
@@ -15,7 +16,11 @@ const typeLabel = {
   schedule: "참여 일정",
 };
 
-export function ActivityOverview() {
+type ActivityOverviewProps = {
+  activities?: ProfileActivity[];
+};
+
+export function ActivityOverview({ activities = profileActivities }: ActivityOverviewProps) {
   return (
     <div className="min-w-0">
       <SectionHeader
@@ -26,7 +31,7 @@ export function ActivityOverview() {
         className="mb-5"
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {profileActivities.slice(0, 9).map((activity) => (
+        {activities.slice(0, 9).map((activity) => (
           <Card key={activity.id} variant="hover" padding="lg" radius="xl" className="flex min-h-[306px] min-w-0 flex-col overflow-hidden">
             <div className={["relative mb-5 min-h-[108px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-gradient-to-br", activity.gradient].join(" ")}>
               <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] bg-[size:24px_24px]" />

@@ -6,34 +6,41 @@ import { ProfileSavedEquipment } from "@/components/profile/ProfileSavedEquipmen
 import { ProfileSavedFacilities } from "@/components/profile/ProfileSavedFacilities";
 import { SavedPreview } from "@/components/profile/SavedPreview";
 import type { ProfileTab } from "@/components/profile/ProfileTabs";
+import type { ProfilePageData } from "@/types";
 
-type ProfileTabPanelProps = { activeTab: ProfileTab };
+type ProfileTabPanelProps = {
+  activeTab: ProfileTab;
+  data: Pick<
+    ProfilePageData,
+    "activities" | "savedCourses" | "savedFacilities" | "joinedCrews" | "savedEquipment" | "myPosts"
+  >;
+};
 
-export function ProfileTabPanel({ activeTab }: ProfileTabPanelProps) {
+export function ProfileTabPanel({ activeTab, data }: ProfileTabPanelProps) {
   if (activeTab === "저장한 코스") {
-    return <ProfileSavedCourses />;
+    return <ProfileSavedCourses courses={data.savedCourses} />;
   }
 
   if (activeTab === "저장한 시설") {
-    return <ProfileSavedFacilities />;
+    return <ProfileSavedFacilities facilities={data.savedFacilities} />;
   }
 
   if (activeTab === "가입한 크루") {
-    return <ProfileJoinedCrews />;
+    return <ProfileJoinedCrews crews={data.joinedCrews} />;
   }
 
   if (activeTab === "관심 장비") {
-    return <ProfileSavedEquipment />;
+    return <ProfileSavedEquipment equipment={data.savedEquipment} />;
   }
 
   if (activeTab === "작성한 글") {
-    return <ProfileMyPosts />;
+    return <ProfileMyPosts posts={data.myPosts} />;
   }
 
   return (
     <div className="grid min-w-0 gap-8">
-      <ActivityOverview />
-      <SavedPreview />
+      <ActivityOverview activities={data.activities} />
+      <SavedPreview courses={data.savedCourses} crews={data.joinedCrews} equipment={data.savedEquipment} />
     </div>
   );
 }

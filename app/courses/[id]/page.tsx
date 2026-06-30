@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CourseDescription } from "@/components/courses/detail/CourseDescription";
 import { CourseDetailCTA } from "@/components/courses/detail/CourseDetailCTA";
 import { CourseDetailHero } from "@/components/courses/detail/CourseDetailHero";
@@ -9,7 +9,7 @@ import { CourseSummaryCards } from "@/components/courses/detail/CourseSummaryCar
 import { Section } from "@/components/common/ui/Section";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { courseDetails } from "@/lib/mock";
+import { getRunningCourseById, getRunningCourseIds } from "@/lib/queries/courses";
 
 type CourseDetailPageProps = {
   params: Promise<{
@@ -17,13 +17,21 @@ type CourseDetailPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return courseDetails.map((course) => ({ id: String(course.id) }));
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  try {
+    const ids = await getRunningCourseIds();
+
+    return ids.map((id) => ({ id }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { id } = await params;
-  const course = courseDetails.find((item) => item.id === Number(id));
+  const course = await getRunningCourseById(id);
 
   if (!course) {
     notFound();

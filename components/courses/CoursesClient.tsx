@@ -6,7 +6,6 @@ import { CourseList } from "@/components/courses/CourseList";
 import { CourseMapPanel } from "@/components/courses/CourseMapPanel";
 import { CoursesPageHero } from "@/components/courses/CoursesPageHero";
 import { Section } from "@/components/common/ui/Section";
-import { runningCourses } from "@/lib/mock";
 import type { CourseDifficulty, RunningCourse } from "@/types";
 
 const initialFilters: CourseFilters = {
@@ -69,14 +68,18 @@ function sortCourses(courses: RunningCourse[], sort: string) {
   );
 }
 
-export function CoursesClient() {
+type CoursesClientProps = {
+  courses: RunningCourse[];
+};
+
+export function CoursesClient({ courses }: CoursesClientProps) {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<CourseFilters>(initialFilters);
 
   const filteredCourses = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextCourses = runningCourses.filter((course) => {
+    const nextCourses = courses.filter((course) => {
       const searchableText = [
         course.name,
         course.region,
@@ -104,7 +107,7 @@ export function CoursesClient() {
     });
 
     return sortCourses(nextCourses, filters.sort);
-  }, [filters, query]);
+  }, [courses, filters, query]);
 
   const handleFilterChange = (key: keyof CourseFilters, value: string) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -122,13 +125,13 @@ export function CoursesClient() {
         <CourseFilterBar
           filters={filters}
           resultCount={filteredCourses.length}
-          totalCount={runningCourses.length}
+          totalCount={courses.length}
           onFilterChange={handleFilterChange}
           onReset={handleReset}
         />
         <div className="grid gap-5 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.4fr)] lg:items-start">
           <CourseMapPanel courses={filteredCourses} />
-          <CourseList courses={filteredCourses} totalCount={runningCourses.length} onReset={handleReset} />
+          <CourseList courses={filteredCourses} totalCount={courses.length} onReset={handleReset} />
         </div>
       </Section>
     </>

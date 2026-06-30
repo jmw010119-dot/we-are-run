@@ -1,14 +1,17 @@
-﻿import Link from "next/link";
-import { Bell, Search, UserCircle, X } from "lucide-react";
+import Link from "next/link";
+import { Bell, LogIn, Search, UserCircle, X } from "lucide-react";
+import { SignOutButton } from "@/components/auth/SignOutButton";
+import type { HeaderUser } from "@/components/auth/UserMenu";
 import type { NavigationItem } from "@/components/layout/Navigation";
 
 type MobileMenuProps = {
   items: NavigationItem[];
   isOpen: boolean;
   onClose: () => void;
+  user: HeaderUser | null;
 };
 
-export function MobileMenu({ items, isOpen, onClose }: MobileMenuProps) {
+export function MobileMenu({ items, isOpen, onClose, user }: MobileMenuProps) {
   const rootClassName = ["lg:hidden", isOpen ? "pointer-events-auto" : "pointer-events-none"].join(" ");
   const overlayClassName = [
     "fixed inset-0 top-[84px] z-40 bg-run-bg/70 backdrop-blur-md transition-opacity duration-200",
@@ -56,10 +59,28 @@ export function MobileMenu({ items, isOpen, onClose }: MobileMenuProps) {
           <button type="button" aria-label="알림" className="grid min-h-16 place-items-center rounded-md border border-white/[0.06] bg-white/[0.02] text-run-muted transition duration-200 hover:scale-[1.03] hover:border-run-lime/50 hover:text-run-lime">
             <Bell size={21} />
           </button>
-          <Link href="/profile" onClick={onClose} aria-label="프로필" className="grid min-h-16 place-items-center rounded-md border border-white/[0.06] bg-white/[0.02] text-run-muted transition duration-200 hover:scale-[1.03] hover:border-run-lime/50 hover:text-run-lime">
-            <UserCircle size={21} />
-          </Link>
+          {user ? (
+            <Link href="/profile" onClick={onClose} aria-label="마이페이지" className="grid min-h-16 place-items-center rounded-md border border-white/[0.06] bg-white/[0.02] text-run-muted transition duration-200 hover:scale-[1.03] hover:border-run-lime/50 hover:text-run-lime">
+              <UserCircle size={21} />
+            </Link>
+          ) : (
+            <Link href="/login" onClick={onClose} aria-label="로그인" className="grid min-h-16 place-items-center rounded-md border border-white/[0.06] bg-white/[0.02] text-run-muted transition duration-200 hover:scale-[1.03] hover:border-run-lime/50 hover:text-run-lime">
+              <LogIn size={21} />
+            </Link>
+          )}
         </div>
+
+        {user ? (
+          <div className="border-t border-white/[0.05] p-3">
+            <div className="mb-3 rounded-md border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+              <p className="text-xs font-bold text-run-muted">로그인됨</p>
+              <p className="mt-1 truncate text-sm font-black text-run-text">
+                {user.name || user.email || "러너"}
+              </p>
+            </div>
+            <SignOutButton fullWidth />
+          </div>
+        ) : null}
       </aside>
     </div>
   );

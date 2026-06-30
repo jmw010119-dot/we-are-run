@@ -1,8 +1,12 @@
 import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { UserRole } from "@prisma/client";
 import Google from "next-auth/providers/google";
 import { isGoogleEnabled } from "@/lib/auth/checkProvider";
+import { prisma } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [
     ...(isGoogleEnabled()
       ? [
@@ -15,6 +19,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // TODO: Kakao and Naver providers will be added in later sprints.
   ],
   session: {
-    strategy: "jwt",
+    strategy: "database",
+  },
+  callbacks: {
+    session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+        session.user.role = user.role ?? UserRole.USER;
+      }
+
+      return session;
+    },
   },
 });

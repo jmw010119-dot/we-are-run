@@ -1,8 +1,13 @@
-﻿import { Target } from "lucide-react";
+import { Target } from "lucide-react";
 import { Card } from "@/components/common/ui/Card";
 import { profileGoals } from "@/lib/mock";
+import type { ProfileGoal } from "@/types";
 
-export function RunningGoalCard() {
+type RunningGoalCardProps = {
+  goal?: ProfileGoal;
+};
+
+export function RunningGoalCard({ goal = profileGoals }: RunningGoalCardProps) {
   return (
     <Card variant="glass" padding="lg" radius="xl" className="overflow-hidden">
       <div className="relative">
@@ -17,15 +22,15 @@ export function RunningGoalCard() {
       </div>
       <div className="mt-6 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-4xl font-black text-run-lime">{profileGoals.currentDistance}</p>
-          <p className="mt-1 text-xs font-bold text-run-muted">목표 {profileGoals.weeklyDistance}</p>
+          <p className="truncate text-4xl font-black text-run-lime">{goal.currentDistance}</p>
+          <p className="mt-1 text-xs font-bold text-run-muted">목표 {goal.weeklyDistance}</p>
         </div>
-        <p className="shrink-0 text-sm font-black text-run-text">{profileGoals.progress}%</p>
+        <p className="shrink-0 text-sm font-black text-run-text">{goal.progress}%</p>
       </div>
       <div className="mt-4 h-2.5 overflow-hidden rounded-full border border-white/[0.04] bg-run-bg">
-        <div className="h-full rounded-full bg-run-lime shadow-[0_0_20px_rgba(183,255,42,0.38)]" style={{ width: `${profileGoals.progress}%` }} />
+        <div className="h-full rounded-full bg-run-lime shadow-[0_0_20px_rgba(183,255,42,0.38)]" style={{ width: `${goal.progress}%` }} />
       </div>
-      <p className="mt-4 break-keep text-sm font-semibold leading-6 text-run-muted">{profileGoals.message}</p>
+      <p className="mt-4 break-keep text-sm font-semibold leading-6 text-run-muted">{goal.message}</p>
     </Card>
   );
 }

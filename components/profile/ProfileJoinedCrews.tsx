@@ -5,9 +5,14 @@ import { Button } from "@/components/common/ui/Button";
 import { Card } from "@/components/common/ui/Card";
 import { EmptyState } from "@/components/common/ui/EmptyState";
 import { profileJoinedCrews } from "@/lib/mock";
+import type { RunningCrew } from "@/types";
 
-export function ProfileJoinedCrews() {
-  if (profileJoinedCrews.length === 0) {
+type ProfileJoinedCrewsProps = {
+  crews?: Pick<RunningCrew, "id" | "name" | "region" | "city" | "memberCount" | "level" | "nextSchedule" | "gradient">[];
+};
+
+export function ProfileJoinedCrews({ crews = profileJoinedCrews }: ProfileJoinedCrewsProps) {
+  if (crews.length === 0) {
     return <EmptyState title="가입한 크루가 없습니다" description="함께 달릴 크루를 찾으면 이곳에서 확인할 수 있습니다." />;
   }
 
@@ -15,7 +20,7 @@ export function ProfileJoinedCrews() {
     <div className="min-w-0">
       <SectionHeader label="JOINED CREWS" title="가입한 크루" description="정기런과 번개런을 함께하는 크루 목록입니다." compact className="mb-5" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {profileJoinedCrews.map((crew) => (
+        {crews.map((crew) => (
           <Card key={crew.id} variant="hover" padding="lg" radius="xl" className="flex min-h-[372px] min-w-0 flex-col overflow-hidden">
             <div className={["mb-5 h-28 shrink-0 rounded-[18px] border border-white/[0.08] bg-gradient-to-br", crew.gradient].join(" ")} />
             <Badge variant="green" className="w-fit">{crew.level}</Badge>

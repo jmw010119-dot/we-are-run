@@ -1,29 +1,22 @@
 # Auth Flow
 
-WE ARE RUN의 로그인, 회원가입, 로그아웃, 세션 유지, 접근 제어 흐름 설계 문서입니다.
+WE ARE RUN의 로그인, 세션 유지, 로그아웃, 접근 제어 흐름을 정리한 문서입니다.
 
-현재 `/login` 페이지의 Google 버튼은 `signIn("google")` 흐름에 연결되어 있습니다. 실제 Google OAuth 앱과 환경변수는 아직 사용자가 직접 준비해야 합니다.
+현재 상태는 Auth.js v5, Google Provider, Prisma Adapter, Database Session을 사용하는 구조입니다. `/profile`과 `/admin`에는 최소 보호 흐름이 적용되어 있습니다.
 
-라우트와 미들웨어 설계는 [Auth Route & Middleware Plan](auth-route-middleware-plan.md)을 기준으로 관리합니다.
+## Google 로그인 흐름
 
-## Google 로그인 플로우
-
-현재 구현된 최소 흐름:
+현재 구현된 기본 흐름:
 
 ```text
 /login
-↓
-Google로 계속하기 클릭
-↓
-signIn("google", { callbackUrl })
-↓
-Auth.js Google Provider 실행
-↓
-Google OAuth 화면 이동
-↓
-Auth.js callback 처리
-↓
-/profile 또는 callbackUrl로 이동
+-> Google로 계속하기 클릭
+-> signIn("google", { callbackUrl })
+-> Auth.js Google Provider 실행
+-> Google OAuth 화면 이동
+-> Auth.js callback 처리
+-> User / Account / Session DB 저장
+-> /profile 또는 callbackUrl로 이동
 ```
 
 기본 callback URL:
@@ -32,69 +25,85 @@ Auth.js callback 처리
 /profile
 ```
 
-`/login?callbackUrl=/community/write`처럼 접근한 경우에는 해당 `callbackUrl`을 우선 사용합니다.
+`/login?callbackUrl=/community/write`처럼 접근한 경우에는 전달된 `callbackUrl`을 우선 사용할 수 있도록 설계되어 있습니다.
 
-## 회원가입 플로우
+## 회원가입 흐름
 
-OAuth 로그인에서는 별도 회원가입 화면 없이 첫 로그인 시 User가 자동 생성되는 흐름을 사용할 예정입니다.
+OAuth 로그인에서는 별도 회원가입 화면 없이 첫 로그인 시 Auth.js Prisma Adapter가 사용자를 생성합니다.
 
 ```text
 처음 로그인한 사용자
-↓
-OAuth Provider 인증 성공
-↓
-Auth.js가 User 생성
-↓
-Account 생성
-↓
-기본 Profile 값 설정
-↓
-Member 권한 부여
-↓
-홈 또는 callbackUrl로 이동
+-> OAuth Provider 인증 성공
+-> User 생성
+-> Account 생성
+-> Session 생성
+-> Member 권한으로 서비스 이용
 ```
 
-현재는 Prisma Adapter와 DB 연결이 없으므로 실제 User 저장 흐름은 아직 연결하지 않았습니다.
+## 로그아웃 흐름
 
-## 로그아웃 플로우
-
-추후 구현 예정 흐름:
+Header와 모바일 메뉴의 로그아웃 버튼은 Auth.js `signOut`을 호출합니다.
 
 ```text
 로그아웃 클릭
-↓
-Auth.js signOut 호출
-↓
-Session 삭제
-↓
-Session cookie 삭제
-↓
-Guest 상태로 전환
-↓
-홈으로 이동
+-> signOut({ callbackUrl: "/" })
+-> Session 제거
+-> Session cookie 제거
+-> 홈으로 이동
 ```
 
 ## 세션 유지
 
-현재 단계:
+현재 세션 전략:
 
-- 임시로 JWT session strategy 사용
-- Prisma Adapter 미연결
-- Database Session 미사용
+- Prisma Adapter 연결 완료
+- Database Session 사용
+- `session.user.id` 제공
+- `session.user.role` 제공
 
-최종 목표:
+서버에서는 `auth()`로 세션을 읽습니다. Header는 서버 컴포넌트에서 세션을 읽고, 클라이언트 Header UI에는 필요한 사용자 표시 정보만 전달합니다.
 
-```text
-브라우저 cookie에 session id 저장
-↓
-서버에서 session id 확인
-↓
-DB Session 조회
-↓
-User 정보와 권한 확인
-↓
-페이지/기능 접근 허용
+## Header 로그인 상태
+
+비로그인 상태:
+
+- 데스크톱 Header에 `로그인` 버튼 표시
+- 모바일 메뉴에 `로그인` 아이콘 표시
+
+로그인 상태:
+
+- 사용자 이름 또는 이메일 표시
+- 마이페이지 이동 버튼 표시
+- 로그아웃 버튼 표시
+- 모바일 메뉴에도 마이페이지와 로그아웃 표시
+
+## 실제 DB 생성 확인 방법
+
+Google OAuth 환경변수를 설정한 뒤 아래 순서로 확인합니다.
+
+```bash
+npm run dev
 ```
+
+1. 브라우저에서 `/login` 접속
+2. Google로 계속하기 클릭
+3. Google 로그인 완료
+4. `/profile` 이동 확인
+5. 새 터미널에서 Prisma Studio 실행
+
+```bash
+npx prisma studio
+```
+
+6. Prisma Studio에서 아래 테이블 확인
+   - `User`
+   - `Account`
+   - `Session`
+
+주의:
+
+- `DATABASE_URL`, `AUTH_SECRET`, OAuth Client Secret은 화면이나 문서에 노출하지 않습니다.
+- `.env.local`은 GitHub에 올리지 않습니다.
 
 ## 보호 라우트
 
@@ -120,7 +129,9 @@ User 정보와 권한 확인
 - `/community`
 - 각 상세 페이지
 
-현재는 middleware를 만들지 않았으므로 보호 라우트가 실제로 적용되지는 않습니다.
+현재 middleware는 보호 경로에 세션 쿠키가 없으면 `/login?callbackUrl=...`로 이동시킵니다.
+
+`/profile`과 `/admin` 페이지는 서버에서 `auth()`를 다시 확인합니다. `/admin`은 `session.user.role`이 `ADMIN`이 아니면 `/403`으로 이동합니다.
 
 ## Redirect 전략
 
@@ -139,33 +150,39 @@ User 정보와 권한 확인
 Admin이 아닌 사용자가 `/admin` 접근:
 
 ```text
-/
-```
-
-추후 권한 없음 페이지가 생기면 아래로 변경할 수 있습니다.
-
-```text
 /403
 ```
 
-## 환경변수 없을 때 주의사항
+`/403` 페이지는 관리자 권한이 필요한 페이지에 접근했을 때 보여주는 권한 안내 페이지입니다.
+
+## 환경변수 주의사항
 
 `GOOGLE_CLIENT_ID`와 `GOOGLE_CLIENT_SECRET`이 없으면 Google Provider가 등록되지 않습니다.
 
-이 상태에서 Google 버튼을 누르면 Auth.js provider 오류가 발생할 수 있습니다. 실제 로그인 테스트는 Google OAuth 앱과 환경변수를 준비한 뒤 진행합니다.
+실제 로그인 테스트는 Google OAuth 앱과 환경변수를 준비한 뒤 진행합니다.
+
+## 관리자 role 부여
+
+관리자 권한은 DB의 `User.role` 값이 `ADMIN`인지로 판단합니다.
+
+Google 로그인으로 User를 먼저 생성한 뒤 `.env.local`에 `ADMIN_EMAIL`을 설정하고 아래 명령어를 실행합니다.
+
+```bash
+npm run admin:promote
+```
+
+자세한 절차는 [Admin Role Guide](admin-role-guide.md)를 참고합니다.
 
 ## 향후 구현 순서
 
-1. Google OAuth 앱 생성
-2. `.env.local`에 Google Client ID/Secret 추가
-3. Vercel 환경변수 추가
-4. Google 로그인 실제 테스트
-5. Prisma Adapter 연결
-6. DB Session 전환
-7. `/profile` 보호
-8. `/admin` 보호
-9. Kakao OAuth 추가
-10. Naver OAuth 추가
+1. Google OAuth 실제 로그인 검증
+2. Prisma Studio에서 User / Account / Session 확인
+3. Header 로그인 상태 QA
+4. 관리자 role 부여 실행 및 `/admin` 접근 확인
+5. 관리자 role 회수 스크립트 검토
+6. `/community/write`, `/bookmarks`, `/settings` 실제 페이지 구현
+7. Kakao OAuth 추가
+8. Naver OAuth 추가
 
 ## 참고 공식 문서
 

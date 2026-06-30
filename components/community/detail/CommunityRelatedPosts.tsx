@@ -10,9 +10,11 @@ import type { CommunityPostDetail } from "@/types";
 type CommunityRelatedPostsProps = { post: CommunityPostDetail };
 
 export function CommunityRelatedPosts({ post }: CommunityRelatedPostsProps) {
-  const relatedPosts = post.relatedPostIds
-    .map((id) => communityPosts.find((item) => item.id === id))
-    .filter(Boolean);
+  const relatedPosts =
+    post.relatedPosts ??
+    post.relatedPostIds
+      .map((id) => communityPosts.find((item) => item.id === id))
+      .filter(Boolean);
 
   return (
     <div>

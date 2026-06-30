@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CrewActivityFeed } from "@/components/crews/detail/CrewActivityFeed";
 import { CrewDetailCTA } from "@/components/crews/detail/CrewDetailCTA";
 import { CrewDetailHero } from "@/components/crews/detail/CrewDetailHero";
@@ -10,17 +10,25 @@ import { CrewSummaryCards } from "@/components/crews/detail/CrewSummaryCards";
 import { Section } from "@/components/common/ui/Section";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { crewDetails } from "@/lib/mock";
+import { getRunningCrewById, getRunningCrewIds } from "@/lib/queries/crews";
 
 type CrewDetailPageProps = { params: Promise<{ id: string }> };
 
-export function generateStaticParams() {
-  return crewDetails.map((crew) => ({ id: String(crew.id) }));
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  try {
+    const ids = await getRunningCrewIds();
+
+    return ids.map((id) => ({ id }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function CrewDetailPage({ params }: CrewDetailPageProps) {
   const { id } = await params;
-  const crew = crewDetails.find((item) => item.id === Number(id));
+  const crew = await getRunningCrewById(id);
 
   if (!crew) {
     notFound();

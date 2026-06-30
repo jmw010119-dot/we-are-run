@@ -10,17 +10,19 @@ import { RecommendationReason } from "@/components/equipment/detail/Recommendati
 import { Section } from "@/components/common/ui/Section";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { equipmentDetails } from "@/lib/mock";
+import { getEquipmentItemById, getEquipmentItemIds } from "@/lib/queries/equipment";
 
 type EquipmentDetailPageProps = { params: Promise<{ id: string }> };
 
-export function generateStaticParams() {
-  return equipmentDetails.map((item) => ({ id: String(item.id) }));
+export async function generateStaticParams() {
+  const ids = await getEquipmentItemIds();
+
+  return ids.map((id) => ({ id }));
 }
 
 export default async function EquipmentDetailPage({ params }: EquipmentDetailPageProps) {
   const { id } = await params;
-  const item = equipmentDetails.find((equipment) => equipment.id === Number(id));
+  const item = await getEquipmentItemById(id);
 
   if (!item) {
     notFound();

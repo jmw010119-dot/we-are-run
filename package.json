@@ -9,9 +9,13 @@
     "lint": "next lint",
     "prisma:validate": "prisma validate",
     "prisma:format": "prisma format",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "admin:promote": "tsx scripts/promote-admin.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.2",
+    "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "framer-motion": "latest",
     "lucide-react": "latest",
@@ -27,6 +31,7 @@
     "@types/react-dom": "latest",
     "prisma": "^7.8.0",
     "tailwindcss": "latest",
+    "tsx": "^4.22.4",
     "typescript": "latest"
   }
 }

@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { FacilityAmenitiesPanel } from "@/components/facilities/detail/FacilityAmenitiesPanel";
 import { FacilityDescription } from "@/components/facilities/detail/FacilityDescription";
 import { FacilityDetailCTA } from "@/components/facilities/detail/FacilityDetailCTA";
@@ -10,19 +10,27 @@ import { FacilitySummaryCards } from "@/components/facilities/detail/FacilitySum
 import { Section } from "@/components/common/ui/Section";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { facilityDetails } from "@/lib/mock";
+import { getRunningFacilityById, getRunningFacilityIds } from "@/lib/queries/facilities";
 
 type FacilityDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export function generateStaticParams() {
-  return facilityDetails.map((facility) => ({ id: String(facility.id) }));
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  try {
+    const ids = await getRunningFacilityIds();
+
+    return ids.map((id) => ({ id }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function FacilityDetailPage({ params }: FacilityDetailPageProps) {
   const { id } = await params;
-  const facility = facilityDetails.find((item) => item.id === Number(id));
+  const facility = await getRunningFacilityById(id);
 
   if (!facility) {
     notFound();

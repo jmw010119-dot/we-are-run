@@ -9,7 +9,7 @@ import { CommunitySummary } from "@/components/community/CommunitySummary";
 import { CommunityTabs, type CommunityCategoryFilter } from "@/components/community/CommunityTabs";
 import { Button } from "@/components/common/ui/Button";
 import { Section } from "@/components/common/ui/Section";
-import { communityPosts } from "@/lib/mock";
+import { communityPosts as fallbackCommunityPosts } from "@/lib/mock";
 import type { CommunityPost } from "@/types";
 
 function normalizeText(value: string) {
@@ -45,7 +45,11 @@ function matchesSelectedTag(post: CommunityPost, selectedTag: string) {
   });
 }
 
-export function CommunityClient() {
+type CommunityClientProps = {
+  posts?: CommunityPost[];
+};
+
+export function CommunityClient({ posts = fallbackCommunityPosts }: CommunityClientProps) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CommunityCategoryFilter>("전체");
   const [selectedTag, setSelectedTag] = useState("");
@@ -53,13 +57,13 @@ export function CommunityClient() {
   const filteredPosts = useMemo(() => {
     const normalizedQuery = normalizeText(query.trim());
 
-    return communityPosts.filter((post) => {
+    return posts.filter((post) => {
       const matchesCategory = activeCategory === "전체" || post.category === activeCategory;
       const matchesQuery = normalizedQuery.length === 0 || normalizeText(getSearchFields(post)).includes(normalizedQuery);
 
       return matchesCategory && matchesQuery && matchesSelectedTag(post, selectedTag);
     });
-  }, [activeCategory, query, selectedTag]);
+  }, [activeCategory, posts, query, selectedTag]);
 
   const hasActiveFilter = query.trim().length > 0 || activeCategory !== "전체" || selectedTag.length > 0;
 

@@ -401,6 +401,7 @@ export type CommunityPostDetail = CommunityPost & {
   fullContent: string[];
   commentsPreview: CommunityComment[];
   relatedPostIds: number[];
+  relatedPosts?: CommunityPost[];
   authorStats: {
     posts: number;
     totalDistance: string;
@@ -474,6 +475,20 @@ export type ProfileMyPost = {
   likes: number;
   comments: number;
   createdAt: string;
+};
+
+export type ProfilePageData = {
+  user: ProfileUser;
+  stats: ProfileStats;
+  activities: ProfileActivity[];
+  savedCourses: Pick<RunningCourse, "id" | "name" | "region" | "city" | "distance" | "difficulty" | "rating" | "gradient">[];
+  savedFacilities: ProfileSavedFacility[];
+  joinedCrews: Pick<RunningCrew, "id" | "name" | "region" | "city" | "memberCount" | "level" | "nextSchedule" | "gradient">[];
+  savedEquipment: Pick<EquipmentItem, "id" | "name" | "brand" | "category" | "level" | "price" | "rating" | "gradient">[];
+  myPosts: ProfileMyPost[];
+  badges: ProfileBadge[];
+  goal: ProfileGoal;
+  actions: ProfileAction[];
 };
 
 export type AdminStat = {

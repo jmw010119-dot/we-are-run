@@ -8,17 +8,19 @@ import { CommunityRelatedPosts } from "@/components/community/detail/CommunityRe
 import { Section } from "@/components/common/ui/Section";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { communityPostDetails } from "@/lib/mock";
+import { getCommunityPostById, getCommunityPostIds } from "@/lib/queries/community";
 
 type CommunityPostDetailPageProps = { params: Promise<{ id: string }> };
 
-export function generateStaticParams() {
-  return communityPostDetails.map((post) => ({ id: String(post.id) }));
+export async function generateStaticParams() {
+  const ids = await getCommunityPostIds();
+
+  return ids.map((id) => ({ id }));
 }
 
 export default async function CommunityPostDetailPage({ params }: CommunityPostDetailPageProps) {
   const { id } = await params;
-  const post = communityPostDetails.find((item) => item.id === Number(id));
+  const post = await getCommunityPostById(id);
 
   if (!post) {
     notFound();

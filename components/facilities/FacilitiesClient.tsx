@@ -7,7 +7,6 @@ import { FacilityList } from "@/components/facilities/FacilityList";
 import { FacilityMapPanel } from "@/components/facilities/FacilityMapPanel";
 import { FacilitySummary } from "@/components/facilities/FacilitySummary";
 import { Section } from "@/components/common/ui/Section";
-import { runningFacilities } from "@/lib/mock";
 import type { RunningFacility } from "@/types";
 
 const initialFilters: FacilityFilters = {
@@ -32,14 +31,18 @@ function sortFacilities(facilities: RunningFacility[], sort: string) {
   return sorted;
 }
 
-export function FacilitiesClient() {
+type FacilitiesClientProps = {
+  facilities: RunningFacility[];
+};
+
+export function FacilitiesClient({ facilities }: FacilitiesClientProps) {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<FacilityFilters>(initialFilters);
 
   const filteredFacilities = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextFacilities = runningFacilities.filter((facility) => {
+    const nextFacilities = facilities.filter((facility) => {
       const searchableText = [
         facility.name,
         facility.region,
@@ -62,7 +65,7 @@ export function FacilitiesClient() {
     });
 
     return sortFacilities(nextFacilities, filters.sort);
-  }, [filters, query]);
+  }, [facilities, filters, query]);
 
   const handleFilterChange = (key: keyof FacilityFilters, value: string) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -78,17 +81,17 @@ export function FacilitiesClient() {
       <FacilitiesPageHero query={query} onQueryChange={setQuery} />
       <Section spacing="lg" className="border-b-0 pt-8 md:pt-10">
         <div className="grid gap-5">
-          <FacilitySummary facilities={runningFacilities} />
+          <FacilitySummary facilities={facilities} />
           <FacilityFilterBar
             filters={filters}
             resultCount={filteredFacilities.length}
-            totalCount={runningFacilities.length}
+            totalCount={facilities.length}
             onFilterChange={handleFilterChange}
             onReset={handleReset}
           />
           <div className="grid gap-5 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.4fr)] lg:items-start">
             <FacilityMapPanel facilities={filteredFacilities} />
-            <FacilityList facilities={filteredFacilities} totalCount={runningFacilities.length} onReset={handleReset} />
+            <FacilityList facilities={filteredFacilities} totalCount={facilities.length} onReset={handleReset} />
           </div>
         </div>
       </Section>

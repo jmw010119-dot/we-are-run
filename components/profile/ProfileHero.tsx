@@ -4,8 +4,13 @@ import { Button } from "@/components/common/ui/Button";
 import { IconButton } from "@/components/common/ui/IconButton";
 import { Section } from "@/components/common/ui/Section";
 import { profileUser } from "@/lib/mock";
+import type { ProfileUser } from "@/types";
 
-export function ProfileHero() {
+type ProfileHeroProps = {
+  user?: ProfileUser;
+};
+
+export function ProfileHero({ user = profileUser }: ProfileHeroProps) {
   return (
     <Section spacing="lg" className="overflow-hidden pt-12 md:pt-20" containerClassName="max-w-[1320px]">
       <div className="pointer-events-none absolute right-[-14rem] top-0 h-[34rem] w-[34rem] rounded-full bg-run-lime/10 blur-[130px]" />
@@ -18,19 +23,19 @@ export function ProfileHero() {
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end">
             <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-[26px] border border-run-lime/30 bg-run-lime/10 text-4xl font-black text-run-lime shadow-[0_0_50px_rgba(183,255,42,0.16)] md:h-32 md:w-32 md:rounded-[30px] md:text-5xl">
               <div className="absolute inset-0 opacity-35 bg-[linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] bg-[size:18px_18px]" />
-              <span className="relative">{profileUser.avatarLabel}</span>
+              <span className="relative">{user.avatarLabel}</span>
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="green" className="tracking-[0.04em]">MY RUNNING DASHBOARD</Badge>
-                <Badge variant="info" className="tracking-[0.04em]">{profileUser.level}</Badge>
+                <Badge variant="info" className="tracking-[0.04em]">{user.level}</Badge>
               </div>
-              <h1 className="mt-4 break-keep text-4xl font-black leading-tight tracking-normal text-run-text md:text-6xl">{profileUser.nickname}</h1>
-              <p className="mt-2 break-keep text-sm font-black text-run-lime">{profileUser.region}</p>
-              <p className="mt-3 max-w-2xl break-keep text-sm font-semibold leading-6 text-run-muted md:text-base md:leading-7">{profileUser.bio}</p>
+              <h1 className="mt-4 break-keep text-4xl font-black leading-tight tracking-normal text-run-text md:text-6xl">{user.nickname}</h1>
+              <p className="mt-2 break-keep text-sm font-black text-run-lime">{user.region}</p>
+              <p className="mt-3 max-w-2xl break-keep text-sm font-semibold leading-6 text-run-muted md:text-base md:leading-7">{user.bio}</p>
               <div className="mt-5 flex flex-wrap gap-2 text-sm font-bold text-run-muted">
-                <span className="rounded-full border border-run-border bg-run-bg/70 px-3 py-1.5">팔로워 <strong className="text-run-text">{profileUser.followers}</strong></span>
-                <span className="rounded-full border border-run-border bg-run-bg/70 px-3 py-1.5">팔로잉 <strong className="text-run-text">{profileUser.following}</strong></span>
+                <span className="rounded-full border border-run-border bg-run-bg/70 px-3 py-1.5">팔로워 <strong className="text-run-text">{user.followers}</strong></span>
+                <span className="rounded-full border border-run-border bg-run-bg/70 px-3 py-1.5">팔로잉 <strong className="text-run-text">{user.following}</strong></span>
               </div>
             </div>
           </div>
