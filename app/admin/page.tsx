@@ -4,7 +4,6 @@ import { AdminSummaryStats } from "@/components/admin/AdminSummaryStats";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { auth } from "@/auth";
-import { UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
@@ -13,8 +12,7 @@ export default async function AdminPage() {
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/admin");
   }
-
-  if (session.user.role !== UserRole.ADMIN) {
+if (session.user.role !== "ADMIN") {
     redirect("/403");
   }
 
