@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { UserRole } from "@prisma/client";
 import Google from "next-auth/providers/google";
 import { isGoogleEnabled } from "@/lib/auth/checkProvider";
 import { prisma } from "@/lib/db";
@@ -25,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
-        session.user.role = user.role ?? UserRole.USER;
+        session.user.role = user.role ?? "USER";
       }
 
       return session;
