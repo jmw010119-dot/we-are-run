@@ -1,5 +1,5 @@
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient, UserRole } from "@prisma/client";
+import { PrismaClient, UserRole } from "@/generated/prisma";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 

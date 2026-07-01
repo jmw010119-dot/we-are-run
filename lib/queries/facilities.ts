@@ -1,6 +1,6 @@
-import "server-only";
+﻿import "server-only";
 
-import { FacilityStatus as DbFacilityStatus, FacilityType as DbFacilityType } from "@prisma/client";
+import { FacilityStatus as DbFacilityStatus, FacilityType as DbFacilityType } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type {
   CourseDifficulty,

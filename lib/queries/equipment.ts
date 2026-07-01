@@ -1,6 +1,6 @@
-import "server-only";
+﻿import "server-only";
 
-import { EquipmentCategory as DbEquipmentCategory, UserLevel as DbUserLevel } from "@prisma/client";
+import { EquipmentCategory as DbEquipmentCategory, UserLevel as DbUserLevel } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type {
   AlternativeEquipment,

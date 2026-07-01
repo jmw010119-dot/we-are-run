@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
+    "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:format": "prisma format",
     "prisma:studio": "prisma studio",

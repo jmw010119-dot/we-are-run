@@ -1,6 +1,6 @@
-import "server-only";
+﻿import "server-only";
 
-import { CrewLevel as DbCrewLevel, CrewRunType as DbCrewRunType } from "@prisma/client";
+import { CrewLevel as DbCrewLevel, CrewRunType as DbCrewRunType } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type { CrewDetail, CrewLevel, CrewRunType, RunningCrew } from "@/types";
 

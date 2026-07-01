@@ -1,4 +1,4 @@
-import "server-only";
+﻿import "server-only";
 
 import {
   CourseDifficulty as DbCourseDifficulty,
@@ -7,7 +7,7 @@ import {
   FacilityType as DbFacilityType,
   PostCategory as DbPostCategory,
   UserLevel as DbUserLevel,
-} from "@prisma/client";
+} from "@/generated/prisma";
 import { db } from "@/lib/db";
 import {
   profileActions,

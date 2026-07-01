@@ -1,6 +1,6 @@
-import "server-only";
+﻿import "server-only";
 
-import { PostCategory as DbPostCategory } from "@prisma/client";
+import { PostCategory as DbPostCategory } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type {
   CommunityCategory,

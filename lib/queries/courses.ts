@@ -1,6 +1,6 @@
-import "server-only";
+﻿import "server-only";
 
-import { CourseDifficulty as DbCourseDifficulty } from "@prisma/client";
+import { CourseDifficulty as DbCourseDifficulty } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type { CourseDetail, CourseDifficulty, CourseReview, CourseType, RunningCourse } from "@/types";
 

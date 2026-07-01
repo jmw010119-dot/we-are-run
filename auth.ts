@@ -5,7 +5,7 @@ import { isGoogleEnabled } from "@/lib/auth/checkProvider";
 import { prisma } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma as never),
   providers: [
     ...(isGoogleEnabled()
       ? [

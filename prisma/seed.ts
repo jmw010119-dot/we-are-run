@@ -18,7 +18,7 @@ import {
   ReviewTargetType,
   UserLevel,
   UserRole,
-} from "@prisma/client";
+} from "../generated/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
